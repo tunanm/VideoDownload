@@ -1,3 +1,5 @@
+import glob
+
 import requests
 import os
 from urllib.parse import urljoin
@@ -5,7 +7,7 @@ import time
 import os
 import subprocess
 
-def download_ts_files(m3u8_url, output_dir, max_retries=3, retry_delay=5):
+def download_ts_files(m3u8_url, output_dir, max_retries=5, retry_delay=5):
     # Make the output directory if it doesn't exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -96,23 +98,62 @@ def merge_ts_files(input_dir, output_file):
     print(f"Running command: {' '.join(command)}")
     try:
         subprocess.run(command, check=True)
-        print(f"Video successfully saved as {output_file}")
+        print(f"Video successfully saved as {output_file} at {input_dir}")
     except subprocess.CalledProcessError as e:
         print(f"Error during ffmpeg execution: {e}")
 
     # Cleanup: remove the temporary file list
     os.remove(list_file_path)
+def clear_ts_file(ts_dir):
+    folder_path = ts_dir
+    # Get all files in the folder
+    files = glob.glob(os.path.join(folder_path, '*'))
 
+    # Loop through and delete each file
+    for file in files:
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except Exception as e:
+            print(f"Failed to delete {file}. Reason: {e}")
+def down_ts_file():
+    m3u8_url = input("Enter m3u8 url: ").strip()  # Replace with the correct .m3u8 URL
+    output_directory = "D:/Film/Down and merge ts file/VideoDownload/ts_files"  # Directory to save .ts files
+    # default_output = int(input("Do you want to use default output or modify it? 1 for default 2 for modify"))
+    # if default_output == 1:
+    #     print(f"Default output is {output_directory}")
+    # if default_output == 2:
+    #     output_directory = input("Enter output directory for saving ts files:").strip()
+    clear_ts_file(output_directory)
+    download_ts_files(m3u8_url, output_directory)
+def merge_video():
+    input_directory = "D:/Film/Down and merge ts file/VideoDownload/ts_files"  # Directory where .ts files are stored
+    # default_input = int(input("Do you want to use default output or modify it? 1 for default 2 for modify"))
+    # if default_input == 1:
+    #     print(f"Default input is {input_directory}")
+    # if default_input == 2:
+    #     input_directory = input("Enter output directory for saving ts files:").strip()
+    output_name = input("Enter output files name: ").strip()
+    output_video = f"{output_name}.mp4"  # Name of the final output video file
+    merge_ts_files(input_directory, output_video)
 
-# # Download all part of video, retry if it fail
-# # Example usage:
-# m3u8_url = "https://vip.opstream11.com/20230106/41022_7d8dc19c/3000k/hls/mixed.m3u8"  # Replace with the correct .m3u8 URL
-# output_directory = "D:/Film/Down and merge ts file/VideoDownload/ts_files"  # Directory to save .ts files
-#
-# download_ts_files(m3u8_url, output_directory)
+while True:
+    user_input = int(input("Enter a number \n"
+                           "0 to exit, \n"
+                           "1 to do get ts file from the url, \n"
+                           "2 to do merge file to video, \n"
+                           "3 to download video without modify ts files: "))
+    if user_input == 0:
+        print("Exiting the loop.")
+        break
+    if user_input == 1:
+        # Download all part of video, retry if it fail Example usage:
+        down_ts_file()
+    if user_input == 2:
+        # Merge the file into one video
+        # Example usage:
+        merge_video()
+    if user_input == 3:
+        down_ts_file()
+        merge_video()
 
-# Merge the file into one video
-# Example usage:
-input_directory = "D:/Film/Down and merge ts file/VideoDownload/ts_files"  # Directory where .ts files are stored
-output_video = "output.mp4"  # Name of the final output video file
-merge_ts_files(input_directory, output_video)

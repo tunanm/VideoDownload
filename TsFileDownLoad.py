@@ -1,5 +1,4 @@
 import glob
-
 import requests
 import os
 from urllib.parse import urljoin
@@ -98,7 +97,7 @@ def merge_ts_files(input_dir, output_file):
     print(f"Running command: {' '.join(command)}")
     try:
         subprocess.run(command, check=True)
-        print(f"Video successfully saved as {output_file} at {input_dir}")
+        print(f"Video successfully saved as {output_file} at {os.path.dirname(input_dir)}")
     except subprocess.CalledProcessError as e:
         print(f"Error during ffmpeg execution: {e}")
 
